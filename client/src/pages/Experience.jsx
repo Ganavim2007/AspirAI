@@ -1,119 +1,146 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Experience() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const role = location.state?.role || "Software Engineer";
-  const [showAnswer, setShowAnswer] = useState({});
 
-  const toggleAnswer = (key) => {
-    setShowAnswer((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+  const [completedTasks, setCompletedTasks] = useState({});
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [xp, setXp] = useState(0);
+  const [streak, setStreak] = useState(7);
 
   const data = {
     "Software Engineer": {
+      description:
+        "Software Engineers build real-world applications, websites, APIs, and scalable systems used by millions of users. They solve problems using programming, development frameworks, databases, and system architecture concepts.",
+
+      salary: "8 – 35+ LPA",
+
+      level: "High Demand",
+
+      duration: "6 – 12 Months Preparation",
+
+      mentorTip:
+        "Focus on DSA + Full Stack Projects together. Most students only study theory and fail in placements because they don't build projects.",
+
       skills: [
         "Data Structures & Algorithms",
         "Problem Solving",
-        "System Design Basics",
         "OOP Concepts",
-        "Debugging & Testing",
-        "API Design",
         "Database Management",
-        "Version Control (Git)",
+        "API Integration",
+        "Git & GitHub",
+        "Debugging",
+        "System Design Basics",
       ],
+
       technologies: [
-        "Java / Python",
         "React.js",
         "Node.js",
         "Express.js",
-        "MongoDB / SQL",
-        "Git & GitHub",
+        "MongoDB",
+        "MySQL",
         "REST APIs",
+        "Java / Python",
       ],
+
       roadmap: [
-        "Learn programming fundamentals (1–2 months)",
-        "Master DSA (3–6 months)",
-        "Build small projects",
-        "Learn frontend & backend",
-        "Build full stack projects",
-        "Learn system design basics",
-        "Practice interview problems daily",
+        "Learn programming basics",
+        "Master arrays, strings, linked lists",
+        "Learn frontend development",
+        "Learn backend APIs",
+        "Build full stack apps",
+        "Practice interview questions",
+        "Deploy projects online",
       ],
+
       dailyPlan: [
-        "2 hours DSA practice",
-        "1 hour development",
-        "1 hour project building",
+        "2 hrs DSA practice",
+        "1 hr development learning",
+        "1 hr project building",
+        "30 mins aptitude",
         "30 mins revision",
       ],
+
       projects: [
-        "E-commerce website with cart system",
-        "Real-time chat application",
-        "Task manager app",
-        "Portfolio generator",
-      ],
-      resources: [
-        "https://leetcode.com",
-        "https://www.youtube.com/@freecodecamp",
-        "https://www.youtube.com/@TraversyMedia",
-        "https://www.geeksforgeeks.org",
-      ],
-      quiz: [
         {
-          q: "What is used to store data permanently?",
-          options: ["RAM", "CPU", "Database", "Cache"],
-          answer: "Database",
+          title: "AI Career Guidance Platform",
+          difficulty: "Advanced",
+        },
+        {
+          title: "E-Commerce Application",
+          difficulty: "Intermediate",
+        },
+        {
+          title: "Real-Time Chat App",
+          difficulty: "Intermediate",
+        },
+        {
+          title: "Portfolio Generator",
+          difficulty: "Beginner",
         },
       ],
-    },
 
-    "Data Scientist": {
-      skills: [
-        "Statistics & Probability",
-        "Machine Learning",
-        "Data Cleaning",
-        "Data Visualization",
-        "Python Programming",
+      weeklyTargets: [
+        "Solve 30 LeetCode questions",
+        "Push code to GitHub daily",
+        "Complete one mini project feature",
+        "Revise DBMS & OS concepts",
       ],
-      technologies: [
-        "Python",
-        "Pandas",
-        "NumPy",
-        "Scikit-learn",
-        "TensorFlow",
-        "SQL",
-      ],
-      roadmap: [
-        "Learn Python basics",
-        "Learn statistics",
-        "Practice datasets",
-        "Learn ML algorithms",
-        "Build ML projects",
-      ],
-      dailyPlan: [
-        "1 hr Python",
-        "1 hr ML theory",
-        "1 hr dataset practice",
-      ],
-      projects: [
-        "Stock prediction model",
-        "Customer segmentation",
-        "Movie recommender",
-      ],
+
       resources: [
-        "https://www.kaggle.com",
-        "https://www.youtube.com/@freecodecamp",
+        {
+          name: "freeCodeCamp",
+          link: "https://www.youtube.com/@freecodecamp",
+        },
+        {
+          name: "Traversy Media",
+          link: "https://www.youtube.com/@TraversyMedia",
+        },
+        {
+          name: "LeetCode",
+          link: "https://leetcode.com",
+        },
       ],
+
+      companies: [
+        "Google",
+        "Microsoft",
+        "Amazon",
+        "Adobe",
+        "Atlassian",
+      ],
+
       quiz: [
         {
-          q: "Which library is used for data analysis?",
-          options: ["Pandas", "React", "HTML", "Java"],
-          answer: "Pandas",
+          q: "Which is mainly used for backend development?",
+          options: ["Node.js", "Figma", "Photoshop", "Canva"],
+          answer: "Node.js",
+        },
+        {
+          q: "Which platform is best for DSA practice?",
+          options: ["LeetCode", "Netflix", "Instagram", "Spotify"],
+          answer: "LeetCode",
+        },
+        {
+          q: "GitHub is used for?",
+          options: [
+            "Version Control",
+            "Photo Editing",
+            "Gaming",
+            "Designing",
+          ],
+          answer: "Version Control",
+        },
+        {
+          q: "Which database is NoSQL?",
+          options: ["MongoDB", "MySQL", "Oracle", "PostgreSQL"],
+          answer: "MongoDB",
         },
       ],
     },
@@ -121,143 +148,435 @@ export default function Experience() {
 
   const plan = data[role] || data["Software Engineer"];
 
-  // UI styles (inline theme system)
+  const currentQuiz = plan.quiz[quizIndex];
+
+  useEffect(() => {
+    const savedXP = localStorage.getItem("xp");
+    if (savedXP) {
+      setXp(Number(savedXP));
+    }
+  }, []);
+
+  const completeTask = (task) => {
+    if (!completedTasks[task]) {
+      setCompletedTasks({
+        ...completedTasks,
+        [task]: true,
+      });
+
+      const newXP = xp + 10;
+      setXp(newXP);
+      localStorage.setItem("xp", newXP);
+    }
+  };
+
+  const nextQuiz = () => {
+    setQuizIndex((prev) =>
+      prev + 1 >= plan.quiz.length ? 0 : prev + 1
+    );
+
+    setSelectedAnswer("");
+    setShowResult(false);
+  };
+
+  const checkAnswer = (option) => {
+    setSelectedAnswer(option);
+    setShowResult(true);
+
+    if (option === currentQuiz.answer) {
+      const newXP = xp + 20;
+      setXp(newXP);
+      localStorage.setItem("xp", newXP);
+    }
+  };
+
+  const progress =
+    (Object.keys(completedTasks).length /
+      plan.dailyPlan.length) *
+    100;
+
   const styles = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(135deg,#0f172a,#020617)",
+      background:
+        "linear-gradient(135deg,#020617,#0f172a,#111827)",
+      padding: "30px",
       color: "white",
-      padding: "40px",
       fontFamily: "Segoe UI",
     },
-    header: {
-      textAlign: "center",
-      marginBottom: "40px",
+
+    hero: {
+      background:
+        "linear-gradient(135deg,#1e293b,#0f172a)",
+      borderRadius: "25px",
+      padding: "35px",
+      marginBottom: "25px",
+      border: "1px solid rgba(255,255,255,0.08)",
+      boxShadow: "0 15px 40px rgba(0,0,0,0.4)",
     },
-    title: {
-      fontSize: "38px",
+
+    heroTitle: {
+      fontSize: "42px",
       fontWeight: "800",
-      background: "linear-gradient(90deg,#facc15,#f97316)",
+      marginBottom: "10px",
+      background:
+        "linear-gradient(90deg,#facc15,#fb7185)",
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
     },
-    section: {
+
+    statsRow: {
+      display: "flex",
+      gap: "15px",
+      flexWrap: "wrap",
+      marginTop: "20px",
+    },
+
+    statCard: {
+      flex: "1",
+      minWidth: "180px",
       background: "rgba(255,255,255,0.05)",
+      padding: "18px",
+      borderRadius: "16px",
       border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: "14px",
-      padding: "20px",
-      marginBottom: "20px",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
     },
+
+    card: {
+      background: "rgba(255,255,255,0.05)",
+      borderRadius: "20px",
+      padding: "25px",
+      marginBottom: "22px",
+      border: "1px solid rgba(255,255,255,0.08)",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    },
+
     heading: {
-      fontSize: "20px",
-      marginBottom: "12px",
+      fontSize: "24px",
+      marginBottom: "18px",
       color: "#60a5fa",
+      fontWeight: "700",
     },
+
     item: {
-      padding: "10px",
-      marginBottom: "8px",
-      background: "rgba(0,0,0,0.4)",
-      borderRadius: "8px",
-      fontSize: "14px",
+      background: "rgba(0,0,0,0.35)",
+      padding: "14px",
+      borderRadius: "12px",
+      marginBottom: "12px",
+      lineHeight: "24px",
+      border: "1px solid rgba(255,255,255,0.05)",
     },
-    button: {
-      marginTop: "30px",
-      padding: "12px 20px",
-      background: "#1f2937",
+
+    taskButton: {
+      marginTop: "10px",
+      background:
+        "linear-gradient(90deg,#2563eb,#7c3aed)",
       border: "none",
+      padding: "10px 15px",
       borderRadius: "10px",
       color: "white",
       cursor: "pointer",
       fontWeight: "600",
     },
-    quizBox: {
-      background: "rgba(255,255,255,0.05)",
-      padding: "15px",
-      borderRadius: "10px",
-      marginBottom: "15px",
-    },
-    option: {
-      display: "block",
+
+    progressBar: {
       width: "100%",
-      marginTop: "5px",
-      padding: "8px",
-      borderRadius: "6px",
-      background: "rgba(0,0,0,0.4)",
-      color: "white",
-      border: "none",
+      height: "14px",
+      background: "#1e293b",
+      borderRadius: "20px",
+      overflow: "hidden",
+      marginTop: "15px",
+    },
+
+    progressFill: {
+      width: `${progress}%`,
+      height: "100%",
+      background:
+        "linear-gradient(90deg,#22c55e,#14b8a6)",
+    },
+
+    quizOption: {
+      background: "#1e293b",
+      padding: "12px",
+      borderRadius: "10px",
+      marginBottom: "10px",
       cursor: "pointer",
+      transition: "0.3s",
+    },
+
+    backButton: {
+      padding: "14px 22px",
+      borderRadius: "12px",
+      border: "none",
+      background:
+        "linear-gradient(90deg,#334155,#475569)",
+      color: "white",
+      cursor: "pointer",
+      fontWeight: "700",
+      marginTop: "10px",
     },
   };
 
   return (
     <div style={styles.page}>
 
-      {/* HEADER */}
-      <div style={styles.header}>
-        <div style={styles.title}>🚀 Experience Plan</div>
-        <p style={{ color: "#94a3b8" }}>Roadmap to become {role}</p>
+      {/* HERO */}
+      <div style={styles.hero}>
+        <div style={styles.heroTitle}>
+          🚀 {role} Mastery Plan
+        </div>
+
+        <p
+          style={{
+            color: "#cbd5e1",
+            lineHeight: "30px",
+            fontSize: "16px",
+          }}
+        >
+          {plan.description}
+        </p>
+
+        <div style={styles.statsRow}>
+          <div style={styles.statCard}>
+            <h3>💰 Salary Range</h3>
+            <p>{plan.salary}</p>
+          </div>
+
+          <div style={styles.statCard}>
+            <h3>📈 Demand</h3>
+            <p>{plan.level}</p>
+          </div>
+
+          <div style={styles.statCard}>
+            <h3>⏳ Preparation</h3>
+            <p>{plan.duration}</p>
+          </div>
+
+          <div style={styles.statCard}>
+            <h3>🔥 XP Earned</h3>
+            <p>{xp} XP</p>
+          </div>
+
+          <div style={styles.statCard}>
+            <h3>⚡ Learning Streak</h3>
+            <p>{streak} Days</p>
+          </div>
+        </div>
+      </div>
+
+      {/* MENTOR TIP */}
+      <div style={styles.card}>
+        <h2 style={styles.heading}>🎓 Mentor Advice</h2>
+
+        <div style={styles.item}>
+          {plan.mentorTip}
+        </div>
       </div>
 
       {/* SKILLS */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Skills You Must Learn</h2>
-        {plan.skills.map((s, i) => (
-          <div key={i} style={styles.item}>{s}</div>
-        ))}
-      </div>
+      <Section
+        title="🧠 Skills You Must Learn"
+        items={plan.skills}
+        styles={styles}
+      />
 
       {/* TECHNOLOGIES */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Technologies</h2>
-        {plan.technologies.map((t, i) => (
-          <div key={i} style={styles.item}>{t}</div>
-        ))}
-      </div>
+      <Section
+        title="⚙ Technologies"
+        items={plan.technologies}
+        styles={styles}
+      />
 
       {/* ROADMAP */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Step-by-Step Roadmap</h2>
-        {plan.roadmap.map((r, i) => (
-          <div key={i} style={styles.item}>{r}</div>
-        ))}
-      </div>
+      <Section
+        title="🛣 Career Roadmap"
+        items={plan.roadmap}
+        styles={styles}
+      />
 
-      {/* DAILY PLAN */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Daily Routine</h2>
-        {plan.dailyPlan.map((d, i) => (
-          <div key={i} style={styles.item}>{d}</div>
+      {/* DAILY TASK TRACKER */}
+      <div style={styles.card}>
+        <h2 style={styles.heading}>
+          📅 Daily Routine Tracker
+        </h2>
+
+        {plan.dailyPlan.map((task, i) => (
+          <div key={i} style={styles.item}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>{task}</span>
+
+              <button
+                style={{
+                  ...styles.taskButton,
+                  background:
+                    completedTasks[task]
+                      ? "#16a34a"
+                      : "linear-gradient(90deg,#2563eb,#7c3aed)",
+                }}
+                onClick={() =>
+                  completeTask(task)
+                }
+              >
+                {completedTasks[task]
+                  ? "Completed"
+                  : "Mark Done"}
+              </button>
+            </div>
+          </div>
         ))}
+
+        <div style={styles.progressBar}>
+          <div style={styles.progressFill}></div>
+        </div>
+
+        <p style={{ marginTop: "10px" }}>
+          Progress: {Math.round(progress)}%
+        </p>
       </div>
 
       {/* PROJECTS */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Projects</h2>
-        {plan.projects.map((p, i) => (
-          <div key={i} style={styles.item}>🚀 {p}</div>
+      <div style={styles.card}>
+        <h2 style={styles.heading}>
+          🚀 Recommended Projects
+        </h2>
+
+        {plan.projects.map((project, i) => (
+          <div key={i} style={styles.item}>
+            <strong>{project.title}</strong>
+
+            <div
+              style={{
+                marginTop: "8px",
+                color: "#94a3b8",
+              }}
+            >
+              Difficulty: {project.difficulty}
+            </div>
+          </div>
         ))}
       </div>
 
+      {/* WEEKLY TARGETS */}
+      <Section
+        title="🎯 Weekly Targets"
+        items={plan.weeklyTargets}
+        styles={styles}
+      />
+
+      {/* TOP COMPANIES */}
+      <Section
+        title="🏢 Dream Companies"
+        items={plan.companies}
+        styles={styles}
+      />
+
       {/* RESOURCES */}
-      <div style={styles.section}>
-        <h2 style={styles.heading}>Free Resources</h2>
-        {plan.resources.map((r, i) => (
-          <a key={i} href={r} target="_blank" rel="noreferrer"
-            style={{ ...styles.item, display: "block", color: "#38bdf8" }}>
-            🔗 {r}
+      <div style={styles.card}>
+        <h2 style={styles.heading}>
+          📚 Free Resources
+        </h2>
+
+        {plan.resources.map((resource, i) => (
+          <a
+            key={i}
+            href={resource.link}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              ...styles.item,
+              display: "block",
+              textDecoration: "none",
+              color: "#38bdf8",
+            }}
+          >
+            🔗 {resource.name}
           </a>
         ))}
       </div>
 
+      {/* QUIZ */}
+      <div style={styles.card}>
+        <h2 style={styles.heading}>
+          🎯 Daily Quiz Challenge
+        </h2>
 
-      {/* BACK BUTTON */}
-      <div style={{ textAlign: "center" }}>
-        <button style={styles.button} onClick={() => navigate(-1)}>
-          ⬅ Back
+        <div style={styles.item}>
+          {currentQuiz.q}
+        </div>
+
+        {currentQuiz.options.map((option, i) => (
+          <div
+            key={i}
+            style={styles.quizOption}
+            onClick={() =>
+              checkAnswer(option)
+            }
+          >
+            {option}
+          </div>
+        ))}
+
+        {showResult && (
+          <div
+            style={{
+              marginTop: "15px",
+              padding: "14px",
+              borderRadius: "12px",
+              background:
+                selectedAnswer ===
+                currentQuiz.answer
+                  ? "#14532d"
+                  : "#7f1d1d",
+            }}
+          >
+            {selectedAnswer ===
+            currentQuiz.answer
+              ? "✅ Correct Answer!"
+              : `❌ Correct Answer: ${currentQuiz.answer}`}
+          </div>
+        )}
+
+        <button
+          style={styles.taskButton}
+          onClick={nextQuiz}
+        >
+          Next Quiz →
         </button>
       </div>
 
+      {/* BACK BUTTON */}
+      <div style={{ textAlign: "center" }}>
+        <button
+          style={styles.backButton}
+          onClick={() => navigate(-1)}
+        >
+          ⬅ Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  items,
+  styles,
+}) {
+  return (
+    <div style={styles.card}>
+      <h2 style={styles.heading}>{title}</h2>
+
+      {items.map((item, i) => (
+        <div key={i} style={styles.item}>
+          {item}
+        </div>
+      ))}
     </div>
   );
 }

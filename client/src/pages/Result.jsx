@@ -317,7 +317,7 @@ export default function Result() {
 
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-gray-300">
                     <h3 className="text-2xl font-bold mb-6 text-cyan-300">
-                        🗺️ Step-by-Step Roadmap
+                        🗺️ DAILY DISCIPLINE ROUTINE
                     </h3>
 
   
