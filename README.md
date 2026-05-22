@@ -62,7 +62,9 @@ AI Generates Career Recommendations
 Personalized Guidance & Learning Roadmap
             ↓
 User Achieves Career Goals Effectively
-```
+
+
+---
 
 # 🛠️ Tech Stack
 
